@@ -13,7 +13,12 @@ def parse_sap_alv_csv(file_content, tenant, ingestion_run):
         '000000000000010023': 'Diesel',
         '000000000000010024': 'Petrol',
         '10023': 'Diesel',
-        '10024': 'Petrol'
+        '10024': 'Petrol',
+        '10025': 'Natural Gas',
+    '10026': 'Heating Oil',
+    '10027': 'Propane',
+    '10028': 'Lubricant',  # will still need analyst review — not a combustion fuel
+    '10029': 'Refrigerant R-410A',
     }
 
     records = []
@@ -24,6 +29,9 @@ def parse_sap_alv_csv(file_content, tenant, ingestion_run):
         meins = row.get('MEINS', '').strip()
         budat = row.get('BUDAT', '').strip()
         werks = row.get('WERKS', '').strip()
+
+        if not meins:
+            issues.append("Missing unit (MEINS)")
 
         # Date parsing
         date_start = None
@@ -84,7 +92,7 @@ def parse_pge_green_button_csv(file_content, tenant, ingestion_run):
         usage_str = row.get('Usage', '').strip()
         unit = row.get('Usage Units', '').strip()
         account = row.get('Account Number', '').strip()
-
+        
         date_start = None
         date_end = None
         try:
