@@ -13,15 +13,19 @@ class IngestionRunViewSet(viewsets.ModelViewSet):
     def upload_file(self, request):
         tenant_id = request.data.get('tenant_id')
         source_id = request.data.get('source_id')
+        source_type = request.data.get('source_type')
         uploaded_by = request.data.get('uploaded_by', 'analyst@breathe.esg')
         file_obj = request.FILES.get('file')
 
-        if not all([tenant_id, source_id, file_obj]):
+        if not tenant_id or not file_obj or not (source_id or source_type):
             return Response({"error": "Missing parameters"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             tenant = Tenant.objects.get(id=tenant_id)
-            source = DataSource.objects.get(id=source_id)
+            if source_id:
+                source = DataSource.objects.get(id=source_id)
+            else:
+                source = DataSource.objects.get(source_type=source_type)
         except (Tenant.DoesNotExist, DataSource.DoesNotExist):
             return Response({"error": "Invalid tenant or source"}, status=status.HTTP_404_NOT_FOUND)
 
